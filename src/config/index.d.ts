@@ -1,0 +1,1 @@
+// declare module 'br-validate-access-key';

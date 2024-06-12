@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  sql-server-db:
+    container_name: sql_server
+    image: mcr.microsoft.com/mssql/server:latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Flex@2024"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
