@@ -244,3 +244,13 @@ model CircularityStatusHistory {
 
     @@map("circularityStatusHistory")
 }
+
+model Tb_SSD_FrontEnd_Customer_X_Partnumber {
+    id          Int             @id @default(autoincrement())
+    customer    String          @db.VarChar(255)
+    partnumber  String          @unique @db.VarChar(255)
+    createdAt   DateTime        @default(now())
+
+
+    @@map("tb_SSD_FrontEnd_Customer_X_Partnumber")
+}

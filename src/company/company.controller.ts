@@ -7,7 +7,7 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { CompanyEntity } from './entities/company.entity';
 import { ApiPaginatedResponse } from '@/shared/pagination/pagination.decorator';
-import { Route, RouteGuard } from '@/auth/user.decorator';
+import { RouteGuard } from '@/auth/user.decorator';
 
 @Controller('/'+API_CONSTANTS.API_VERSION+'/company')
 @ApiTags('Company')

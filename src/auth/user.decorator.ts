@@ -33,7 +33,7 @@ export class RouteGuard implements CanActivate {
     const user = request.user;
 
     if (user) {
-        if (user.user.profile.name == 'Administrador') {
+        if (user.user.profile.name === 'Administrador') { // TO DO: Erro de SINTAXE havia somente == não realizando a validação de usuário ADMIN
             return true;
         }
 

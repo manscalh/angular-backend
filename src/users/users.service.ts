@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/database/prisma.service';
@@ -22,7 +22,7 @@ export class UsersService {
       roundsOfHashing,
     );
 
-    createUserDto.id = randomUUID();
+    // createUserDto.id = randomUUID();
     createUserDto.password = hashedPassword;
     createUserDto.createdAt = new Date();
     createUserDto.updatedAt = new Date();
@@ -37,6 +37,7 @@ export class UsersService {
 
         deleted = false;
         active = createUserDto.active;
+        id = createUserDto.id; //add 
         name = createUserDto.name;
         password = createUserDto.password;
         profileId = createUserDto.profileId;
@@ -185,30 +186,65 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id }, include: {
-        profile: true
-      } });
-  }
+    try {
+        return this.prisma.user.findUnique({ where: { id }, include: {
+            profile: true
+        }});
+    } catch (e) {
+        throw new BadRequestException(e)
+    }        
+}
 
   async findOneWithRelations(id: string) {
-    var user = await this.prisma.user.findUnique({ where: { id }, include: {
-        profile: true
-      } });
-
-    var profileAccess = await this.prisma.profileAccess.findMany({ where: { profileId: user.profileId }, include: {
-        menu: true
-    } });
-
-    return {
-        user: user,
-        profileAccess: profileAccess
-    };
+    try {
+        var user = await this.prisma.user.findUnique({ where: { id }, include: {
+            profile: true
+          } });
+    
+        var profileAccess = await this.prisma.profileAccess.findMany({ where: { profileId: user.profileId }, include: {
+            menu: true
+        } });
+    
+        return {
+            user: user,
+            profileAccess: profileAccess
+        }
+    } catch (e) {
+        throw new BadRequestException(e)
+    }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    updateUserDto.updatedAt = new Date();
+    try {
+        updateUserDto.updatedAt = new Date();
 
-    if (updateUserDto.changePassword) {
+        if (updateUserDto.changePassword) {
+
+            const hashedPassword = await bcrypt.hash(
+                updateUserDto.password,
+                roundsOfHashing,
+            );
+
+            updateUserDto.password = hashedPassword;
+
+            var {active, companyId, email, name, password, profileId, updatedAt, resetPasswordNextLogin, deleted } = updateUserDto;
+
+            return this.prisma.user.update({ where: { id }, data: {deleted, active, password, resetPasswordNextLogin, companyId, email, name, profileId, updatedAt } });
+        }
+        else{
+            var {active, companyId, email, name, profileId, updatedAt, resetPasswordNextLogin } = updateUserDto;
+            return this.prisma.user.update({ where: { id }, data: {active, companyId, email, name, profileId, updatedAt, resetPasswordNextLogin } });
+        }
+    } catch (e) {
+        throw new BadRequestException(e)
+    }     
+    
+
+  }
+
+  async updatePass(id: string, updateUserDto: UpdateUserDto) {
+    try {
+        updateUserDto.updatedAt = new Date();
 
         const hashedPassword = await bcrypt.hash(
             updateUserDto.password,
@@ -217,50 +253,36 @@ export class UsersService {
 
         updateUserDto.password = hashedPassword;
 
-        var {active, companyId, email, name, password, profileId, updatedAt, resetPasswordNextLogin, deleted } = updateUserDto;
+        var { password, resetPasswordNextLogin, updatedAt } = updateUserDto;
 
-        return this.prisma.user.update({ where: { id }, data: {deleted, active, password, resetPasswordNextLogin, companyId, email, name, profileId, updatedAt } });
-    }
-    else{
-        var {active, companyId, email, name, profileId, updatedAt, resetPasswordNextLogin } = updateUserDto;
-        return this.prisma.user.update({ where: { id }, data: {active, companyId, email, name, profileId, updatedAt, resetPasswordNextLogin } });
-    }
-
-
-  }
-
-  async updatePass(id: string, updateUserDto: UpdateUserDto) {
-    updateUserDto.updatedAt = new Date();
-
-    const hashedPassword = await bcrypt.hash(
-        updateUserDto.password,
-        roundsOfHashing,
-    );
-
-    updateUserDto.password = hashedPassword;
-
-    var { password, resetPasswordNextLogin, updatedAt } = updateUserDto;
-
-    return this.prisma.user.update({ where: { id }, data: { updatedAt, resetPasswordNextLogin, password } });
+        return this.prisma.user.update({ where: { id }, data: { updatedAt, resetPasswordNextLogin, password } });
+    } catch (e) {
+        throw new BadRequestException(e)
+    }     
   }
 
   async remove(id: string) {
-    // return this.prisma.user.delete({ where: { id } });
-    var obj = await this.findOne(id);
+    try {
+        // return this.prisma.user.delete({ where: { id } });
+        var obj = await this.findOne(id);
 
-    var {active, updatedAt, deleted} = obj;
+        var {active, updatedAt, deleted} = obj;
 
-    active = false;
-    deleted = true;
+        active = false;
+        deleted = true;
 
-    return await this.prisma.user.update(
-        {
-        where: { id },
-        data: {
-            active, updatedAt, deleted
+        return await this.prisma.user.update(
+            {
+            where: { id },
+            data: {
+                active, updatedAt, deleted
+                }
             }
-        }
-    );
+        );
+    } catch (e) {
+        throw new BadRequestException(e)
+    }     
+        
   }
 
 }

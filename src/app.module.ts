@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { MailerModule } from '@nestjs-modules/mailer';
 import { CompanyModule } from './company/company.module';
 import { ProfileModule } from './profile/profile.module';
 import { ProductModule } from './product/product.module';
@@ -14,6 +13,8 @@ import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { PrismaClientExceptionFilter, providePrismaClientExceptionFilter } from 'nestjs-prisma';
 import { BrandModule } from './brand/brand.module';
 import { CircularityModule } from './circularity/circularity.module';
+import { CustomerModule } from './customer/customer.module';
+import { AuthADModule } from './authAD/authAD.module';
 
 export const  user = process.env.TRADEIN_MAIL_USER;
 export const  pass = process.env.TRADEIN_MAIL_PASS;
@@ -51,15 +52,17 @@ export const transporter = porta == 25 ? {
   imports: [
     DatabaseModule,
     AuthModule,
+    AuthADModule,
     UsersModule,
-    MailerModule.forRoot(transporter),
+    //MailerModule.forRoot(transporter),
     CompanyModule,
     ProfileModule,
     ProductModule,
     MenuModule,
     PaginationModule,
     BrandModule,
-    CircularityModule
+    CircularityModule,
+    CustomerModule
   ],
   controllers: [AppController, ],
   providers: [AppService, providePrismaClientExceptionFilter()],
